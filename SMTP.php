@@ -13,16 +13,16 @@
   License URI:      http://www.gnu.org/licenses/gpl-2.0.txt
 */
 
-function sendgridAPI() {
+function sendgrid_API() {
     
     if(isset($_POST['send_mail'])) {
         
         $name       =   sanitize_text_field($_POST['uname']);
         $email      =   sanitize_email($_POST['email']);
         $subject    =   sanitize_text_field($_POST['subject']);   
-        $message    =   sanitize_text_field($_POST['message']);  
+        $message    =   sanitize_textarea_field($_POST['message']);  
 
-        sendMail($name,$email,$subject,$message); 
+        sendgrid_SendMail($name,$email,$subject,$message); 
 
     }
     
@@ -41,7 +41,7 @@ function sendgridAPI() {
     
 }
 
-function sendMail($name,$email,$subject,$message) {
+function sendgrid_SendMail($name,$email,$subject,$message) {
 
     $data = array(
         "personalizations" => array(
@@ -87,38 +87,46 @@ function sendMail($name,$email,$subject,$message) {
 
     $response = wp_remote_post("https://api.sendgrid.com/v3/mail/send",$arguments);
 
-    if (empty(!$response["body"])) {
-        errorMessage($response,$name);
+    if ( is_wp_error( $response ) ) {
+        echo '<div class="notice notice-error is-dismissible"><p>';
+        echo "Sorry ". $name .", Something went wrong : Please Check Your Internet Connection !";
+        echo '</p></div>';
     } else {
-        successMessage($name);    
+        if (empty(!$response[ "body" ])) {
+            sendgrid_ErrorMessage( $response,$name );
+        } else {
+            sendgrid_SuccessMessage( $name );    
+        }
     }
+
+    
 }
 
-function errorMessage($response,$name) {
+function sendgrid_ErrorMessage( $response,$name ) {
     echo '<div class="notice notice-error is-dismissible"><p>';
-    $result = ($response["body"]);
-    $result=(explode('"',$result));
-    echo "Sorry ". $name .", Something went wrong : ". ($result[5]);
+    $result = ( $response["body"] );
+    $result=( explode('"',$result) );
+    echo "Sorry ". $name .", Something went wrong : ". ( $result[5] );
     echo '</p></div>';
 }
 
-function successMessage($name) {
+function sendgrid_SuccessMessage( $name ) {
     echo '<div class="notice notice-success is-dismissible"><p>';
     echo "Dear " . $name .", Your E-Mail Sent Successfully";
     echo '</p></div>';
 }
 
-function sendgridMenu() {
+function sendgrid_Menu() {
 
     add_menu_page(
       'SMTP',                 // page title  
       'SMTP',                // menu title  
       'manage_options',     // capability  
       'SMTP',              // menu slug  
-      'sendgridAPI',      // callback function  
+      'sendgrid_API',      // callback function  
     );
 }
 
-add_action( 'admin_menu', 'sendgridMenu' );
+add_action( 'admin_menu', 'sendgrid_Menu' );
 
 ?>
