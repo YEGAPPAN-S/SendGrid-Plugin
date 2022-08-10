@@ -1,9 +1,3 @@
-<?php
-/*
-  Plugin Name:      SendGrid SMTP
-*/
-?>
-
 <html>
   <body>
     <div><center>
@@ -18,5 +12,3 @@
     </center></div>
   </body>
 </html>
-
-
